@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KatalogAplikasi - Katalog Aplikasi Sederhana</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #f4f6fb; color: #1e293b; }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; padding: 40px 20px 70px; text-align: center;
+  }
+  header h1 { font-size: 2rem; margin-bottom: 8px; }
+  header p { opacity: .9; margin-bottom: 20px; }
+
+  /* Search */
+  .search-box {
+    max-width: 480px; margin: 0 auto; display: flex;
+    background: #fff; border-radius: 50px; overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,.15);
+  }
+  .search-box input {
+    flex: 1; border: none; padding: 14px 20px; font-size: 1rem; outline: none;
+  }
+  .search-box button {
+    border: none; background: #4f46e5; color: #fff; padding: 0 24px;
+    cursor: pointer; font-size: 1rem;
+  }
+  .search-box button:hover { background: #4338ca; }
+
+  /* Kategori */
+  .categories {
+    max-width: 1000px; margin: -30px auto 30px; padding: 0 20px;
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  }
+  .cat-btn {
+    background: #fff; border: 2px solid #e2e8f0; padding: 8px 18px;
+    border-radius: 25px; cursor: pointer; font-size: .9rem; color: #475569;
+    transition: .2s;
+  }
+  .cat-btn:hover, .cat-btn.active {
+    background: #4f46e5; color: #fff; border-color: #4f46e5;
+  }
+
+  /* Grid */
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 20px 50px; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;
+  }
+  .card {
+    background: #fff; border-radius: 16px; padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: .25s;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .card:hover { transform: translateY(-6px); box-shadow: 0 10px 24px rgba(0,0,0,.12); }
+  .icon {
+    width: 64px; height: 64px; border-radius: 16px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.8rem;
+    margin-bottom: 14px; color: #fff;
+  }
+  .card h3 { font-size: 1.1rem; margin-bottom: 4px; }
+  .card .dev { font-size: .8rem; color: #94a3b8; margin-bottom: 10px; }
+  .card .desc { font-size: .85rem; color: #64748b; line-height: 1.5; margin-bottom: 14px; flex: 1; }
+  .badge {
+    font-size: .7rem; background: #eef2ff; color: #4f46e5;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-weight: 600;
+  }
+  .card .meta { display: flex; align-items: center; gap: 12px; font-size: .8rem; color: #f59e0b; margin-bottom: 14px; }
+  .card .meta span:last-child { color: #64748b; }
+  .btn {
+    display: inline-block; background: #4f46e5; color: #fff; text-decoration: none;
+    padding: 10px 24px; border-radius: 25px; font-size: .85rem; transition: .2s;
+  }
+  .btn:hover { background: #4338ca; }
+
+  .empty { text-align: center; color: #94a3b8; padding: 40px; display: none; }
+
+  footer { text-align: center; padding: 20px; color: #94a3b8; font-size: .85rem; background: #fff; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📱 KatalogAplikasi</h1>
+  <p>Temukan aplikasi terbaik untuk kebutuhan Anda</p>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Cari aplikasi...">
+    <button onclick="filterApps()">🔍 Cari</button>
+  </div>
+</header>
+
+<div class="categories">
+  <button class="cat-btn active" data-cat="semua">Semua</button>
+  <button class="cat-btn" data-cat="produktivitas">Produktivitas</button>
+  <button class="cat-btn" data-cat="desain">Desain</button>
+  <button class="cat-btn" data-cat="musik">Musik</button>
+  <button class="cat-btn" data-cat="kesehatan">Kesehatan</button>
+  <button class="cat-btn" data-cat="keuangan">Keuangan</button>
+</div>
+
+<div class="container">
+  <div class="grid" id="appGrid"></div>
+  <div class="empty" id="emptyMsg">Tidak ada aplikasi yang ditemukan 😢</div>
+</div>
+
+<footer>© 2026 KatalogAplikasi. Dibuat dengan ❤️</footer>
+
+<script>
+const apps = [
+  { nama: "TaskFlow", dev: "FlowSoft", desc: "Aplikasi manajemen tugas dengan fitur kolaborasi tim.", kategori: "produktivitas", rating: 4.8, unduhan: "1M+", icon: "✅", warna: "#3b82f6" },
+  { nama: "NoteMaster", dev: "Pixel Labs", desc: "Catatan digital dengan sinkronisasi lintas perangkat.", kategori: "produktivitas", rating: 4.6, unduhan: "500K+", icon: "📝", warna: "#10b981" },
+  { nama: "DesignX", dev: "Creative Co", desc: "Editor desain grafis yang mudah digunakan.", kategori: "desain", rating: 4.9, unduhan: "2M+", icon: "🎨", warna: "#f59e0b" },
+  { nama: "PhotoPro", dev: "SnapTech", desc: "Edit foto profesional dengan filter AI canggih.", kategori: "desain", rating: 4.7, unduhan: "3M+", icon: "📸", warna: "#ec4899" },
+  { nama: "MusicBox", dev: "Wave Studio", desc: "Streaming musik jutaan lagu dengan kualitas HD.", kategori: "musik", rating: 4.8, unduhan: "5M+", icon: "🎵", warna: "#8b5cf6" },
+  { nama: "BeatMaker", dev: "Rhythm Inc", desc: "Buat musik dan beat Anda sendiri dengan mudah.", kategori: "musik", rating: 4.5, unduhan: "800K+", icon: "🥁", warna: "#ef4444" },
+  { nama: "FitTrack", dev: "HealthPlus", desc: "Pantau aktivitas olahraga dan pola makan harian.", kategori: "kesehatan", rating: 4.7, unduhan: "2M+", icon: "💪", warna: "#22c55e" },
+  { nama: "SleepWell", dev: "DreamSoft", desc: "Aplikasi tidur dengan suara relaksasi dan meditasi.", kategori: "kesehatan", rating: 4.6, unduhan: "1M+", icon: "😴", warna: "#6366f1" },
+  { nama: "MoneyCare", dev: "FinTech ID", desc: "Kelola keuangan, catat pengeluaran, dan buat anggaran.", kategori: "keuangan", rating: 4.8, unduhan: "1.5M+", icon: "💰", warna: "#14b8a6" },
+  { nama: "InvestKu", dev: "CapitalApp", desc: "Belajar investasi dan pantau portofolio saham.", kategori: "keuangan", rating: 4.5, unduhan: "600K+", icon: "📈", warna: "#f97316" },
+];
+
+let kategoriAktif = "semua";
+
+function render() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const grid = document.getElementById("appGrid");
+  const hasil = apps.filter(a =>
+    (kategoriAktif === "semua" || a.kategori === kategoriAktif) &&
+    a.nama.toLowerCase().includes(q)
+  );
+  document.getElementById("emptyMsg").style.display = hasil.length ? "none" : "block";
+  grid.innerHTML = hasil.map(a => `
+    <div class="card">
+      <div class="icon" style="background:${a.warna}">${a.icon}</div>
+      <h3>${a.nama}</h3>
+      <div class="dev">oleh ${a.dev}</div>
+      <p class="desc">${a.desc}</p>
+      <div class="badge">${a.kategori}</div>
+      <div class="meta"><span>★ ${a.rating}</span><span>⬇ ${a.unduhan} unduhan</span></div>
+      <a href="#" class="btn" onclick="alert('Mengunduh ${a.nama}...');return false;">Unduh</a>
+    </div>`).join("");
+}
+
+function filterApps() { render(); }
+
+document.getElementById("search").addEventListener("input", render);
+
+document.querySelectorAll(".cat-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelector(".cat-btn.active").classList.remove("active");
+    btn.classList.add("active");
+    kategoriAktif = btn.dataset.cat;
+    render();
+  });
+});
+
+render();
+</script>
+
+</body>
+</html>>
